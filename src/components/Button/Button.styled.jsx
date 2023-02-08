@@ -30,4 +30,9 @@ export const LoadMoreBtn = styled.button`
   :focus {
     background-color: #303f9f;
   }
+  :disabled {
+    color: #fff;
+    border-color: #a0a0a0;
+    background-color: #a0a0a0;
+  }
 `;

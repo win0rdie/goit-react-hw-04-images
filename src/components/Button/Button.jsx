@@ -1,10 +1,10 @@
 import { LoadMoreBtn, BtnContainer } from './Button.styled';
 import PropTypes from 'prop-types';
 
-const Button = ({ onClick }) => {
+const Button = ({ onClick, disabled }) => {
   return (
     <BtnContainer>
-      <LoadMoreBtn type="button" onClick={onClick}>
+      <LoadMoreBtn type="button" onClick={onClick} disabled={disabled}>
         Load more
       </LoadMoreBtn>
     </BtnContainer>
