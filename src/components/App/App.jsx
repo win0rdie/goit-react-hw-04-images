@@ -9,10 +9,10 @@ import Loader from 'components/Loader';
 
 const PER_PAGE = 12;
 
-export default function App() {
+export default function App({ q }) {
   const [images, setImages] = useState([]);
   const [query, setQuery] = useState('');
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [amount, setAmount] = useState(PER_PAGE);
   const [showModal, setShowModal] = useState(false);
@@ -23,15 +23,16 @@ export default function App() {
 
   useEffect(() => {
     if (!query) return;
+    setIsLoading(true);
 
     API.getImages(query, amount)
       .then(({ data }) => {
         setImages(data.hits);
         setTotal(Math.round(data.total / (PER_PAGE + 2)));
-        // setTotal(data);
       })
-      .catch(error => setError(error.message));
-  }, [query, amount]);
+      .catch(error => setError(error.message('')))
+      .finally(() => setIsLoading(false));
+  }, [amount, query]);
 
   const openModal = image => {
     setImageModal(image);
@@ -46,10 +47,23 @@ export default function App() {
     setAmount(amount => amount + PER_PAGE);
     setPage(p => p + 1);
   };
+
   const handleFormSubmit = query => {
     setQuery(query);
     setPage(1);
-    setImages([]);
+    setError('');
+    setAmount(PER_PAGE);
+    setIsLoading(true);
+
+    setImages(
+      API.getImages(query, amount)
+        .then(({ data }) => {
+          setImages(data.hits);
+          setTotal(Math.round(data.total / (PER_PAGE + 2)));
+        })
+        .catch(error => setError(error.message('')))
+        .finally(() => setIsLoading(false))
+    );
   };
 
   useEffect(() => {
@@ -64,18 +78,15 @@ export default function App() {
   return (
     <AppSearchbar>
       <Searchbar onSubmit={handleFormSubmit} />
+      {isLoading && <Loader />}
 
       {images.length > 0 ? (
         <ImageGallery images={images} imageName={query} onModal={openModal} />
       ) : null}
 
-      {isLoading && <Loader />}
-
       {error && <h3>{error}</h3>}
 
-      {page < total && !isLoading && <Loader /> && (
-        <Button onClick={loadMoreImages} disabled={isLoading} />
-      )}
+      {page < total && <Button onClick={loadMoreImages} disabled={isLoading} />}
 
       {showModal && (
         <Modal onClose={closeModal}>
